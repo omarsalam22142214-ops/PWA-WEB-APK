@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PWA Generator & Full Downloader</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
         :root {
             --bg-color: #0f172a;
@@ -14,6 +15,8 @@
             --primary-hover: #2563eb;
             --success: #10b981;
             --success-hover: #059669;
+            --warning: #f59e0b;
+            --warning-hover: #d97706;
         }
         body {
             font-family: system-ui, -apple-system, sans-serif;
@@ -37,7 +40,7 @@
         h1, h2 { text-align: center; color: var(--text-main); margin-top: 0; }
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; color: var(--text-muted); font-size: 0.9rem; }
-        input, textarea {
+        input[type="text"], input[type="color"], textarea {
             width: 100%;
             padding: 10px;
             border: 1px solid #334155;
@@ -49,6 +52,33 @@
         }
         textarea { resize: vertical; font-family: monospace; direction: ltr; }
         
+        /* تصميم زر رفع الملف */
+        .file-upload-wrapper {
+            position: relative;
+            margin-bottom: 10px;
+        }
+        .file-upload-btn {
+            display: inline-block;
+            background-color: #334155;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.3s;
+            border: 1px dashed var(--text-muted);
+        }
+        .file-upload-btn:hover { background-color: #475569; }
+        input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+        }
+
         .btn-main {
             width: 100%;
             padding: 12px;
@@ -63,25 +93,42 @@
         }
         .btn-main:hover { background-color: var(--primary-hover); }
         
+        .btn-zip {
+            width: 100%;
+            padding: 15px;
+            background-color: var(--warning);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+        .btn-zip:hover { background-color: var(--warning-hover); }
+
         .file-section {
-            margin-top: 25px;
+            margin-top: 20px;
             border-bottom: 1px solid #334155;
-            padding-bottom: 20px;
+            padding-bottom: 15px;
             display: flex;
             align-items: center;
             justify-content: space-between;
         }
         .file-section:last-child { border: none; }
         
-        .section-title { font-weight: bold; color: var(--text-main); }
+        .section-title { font-weight: bold; color: var(--text-main); font-size: 0.9rem;}
         .btn-download button {
             background-color: var(--success);
             color: white;
             border: none;
-            padding: 8px 16px;
+            padding: 6px 12px;
             border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
+            font-size: 0.85rem;
             font-family: inherit;
             transition: background 0.3s;
         }
@@ -97,7 +144,7 @@
 
     
     <link rel="manifest" href="./manifest.json">
-    <meta name="theme-color" content="#000000">
+    <meta name="theme-color" content="#808080">
     <link rel="apple-touch-icon" href="./icon-192.png">
     <script>
       if ('serviceWorker' in navigator) {
@@ -113,8 +160,8 @@
 
 <div class="container">
     <div class="card">
-        <h1>صانع ومحمل ملفات PWA المتكامل 🚀</h1>
-        <p style="text-align: center; color: var(--text-muted); margin-bottom: 25px;">الإصدار المحدث السليم 100% بدون أي أخطاء برمجية</p>
+        <h1>صانع PWA الشامل 🚀</h1>
+        <p style="text-align: center; color: var(--text-muted); margin-bottom: 25px;">ارفع ملفك أو اكتب الكود، وهنجهزلك فولدر كامل جاهز للرفع على GitHub</p>
         
         <div class="form-group">
             <label>اسم التطبيق الكامل</label>
@@ -131,16 +178,23 @@
         
         <div class="form-group">
             <label>كود صفحتك الأصلية (index.html)</label>
+            <div class="file-upload-wrapper">
+                <div class="file-upload-btn">📂 ارفع ملف index.html من جهازك</div>
+                <input type="file" id="htmlFileInput" accept=".html, .htm">
+            </div>
             <textarea id="inputHtml" rows="8" placeholder="<!DOCTYPE html>&#10;<html>&#10;<head>&#10;  <title>موقعي</title>&#10;</head>&#10;<body>&#10;  <h1>أهلاً بك</h1>&#10;</body>&#10;</html>"></textarea>
         </div>
 
-        <button class="btn-main" onclick="generateAllFiles()">توليد وتجهيز الـ 5 ملفات للتحميل</button>
+        <button class="btn-main" onclick="generateAllFiles()">توليد وتجهيز الملفات</button>
     </div>
 
     <div class="card" id="resultsCard" style="display: none;">
-        <h2>الملفات الـ 5 الجاهزة للتحميل 📁</h2>
-        <p style="text-align: center; color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">حمل الـ 5 ملفات وارفعهم على مستودع GitHub مباشرة</p>
+        <h2>الملفات الجاهزة 📁</h2>
         
+        <button class="btn-zip" onclick="downloadAsZip()">تحميل الـ 5 ملفات في فولدر ZIP 📦</button>
+        
+        <p style="text-align: center; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 20px;">أو تقدر تحمل كل ملف لوحده من تحت لو حابب:</p>
+
         <div class="preview-box" style="margin-bottom: 20px;">
             <div style="text-align: center;">
                 <img id="icon192Preview" src="" alt="Icon 192" style="width: 96px; height: 96px;">
@@ -154,35 +208,53 @@
 
         <div class="file-section">
             <div class="section-title">1. أيقونة كروم (icon-192.png)</div>
-            <div class="btn-download"><button onclick="downloadBlob('icon-192.png', icon192Blob)">تحميل 📥</button></div>
+            <div class="btn-download"><button onclick="downloadBlob('icon-192.png', icon192Blob)">تحميل منفصل 📥</button></div>
         </div>
 
         <div class="file-section">
             <div class="section-title">2. أيقونة التطبيق (icon-512.png)</div>
-            <div class="btn-download"><button onclick="downloadBlob('icon-512.png', icon512Blob)">تحميل 📥</button></div>
+            <div class="btn-download"><button onclick="downloadBlob('icon-512.png', icon512Blob)">تحميل منفصل 📥</button></div>
         </div>
 
         <div class="file-section">
             <div class="section-title">3. صفحة الموقع (index.html)</div>
-            <div class="btn-download"><button onclick="downloadText('index.html')">تحميل 📥</button></div>
+            <div class="btn-download"><button onclick="downloadText('index.html')">تحميل منفصل 📥</button></div>
         </div>
 
         <div class="file-section">
             <div class="section-title">4. إعدادات التثبيت (manifest.json)</div>
-            <div class="btn-download"><button onclick="downloadText('manifest.json')">تحميل 📥</button></div>
+            <div class="btn-download"><button onclick="downloadText('manifest.json')">تحميل منفصل 📥</button></div>
         </div>
 
         <div class="file-section">
             <div class="section-title">5. ملف الأوفلاين (sw.js)</div>
-            <div class="btn-download"><button onclick="downloadText('sw.js')">تحميل 📥</button></div>
+            <div class="btn-download"><button onclick="downloadText('sw.js')">تحميل منفصل 📥</button></div>
         </div>
     </div>
 </div>
 
 <script>
+    // 1. قراءة ملف الـ HTML المرفوع ووضعه في خانة الكود
+    document.getElementById('htmlFileInput').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('inputHtml').value = e.target.result;
+            // إظهار تنبيه بسيط إن الملف اتقرا
+            const btn = document.querySelector('.file-upload-btn');
+            btn.innerHTML = '✅ تم رفع: ' + file.name;
+            btn.style.backgroundColor = '#10b981';
+            btn.style.borderColor = '#059669';
+        };
+        reader.readAsText(file);
+    });
+
     let textFiles = { 'index.html': '', 'manifest.json': '', 'sw.js': '' };
     let icon192Blob = null;
     let icon512Blob = null;
+    let currentAppName = 'PWA_App';
 
     function createIcon(size, color, text) {
         return new Promise((resolve) => {
@@ -215,6 +287,9 @@
         const themeColor = document.getElementById('themeColor').value;
         const inputHtml = document.getElementById('inputHtml').value;
         
+        // حفظ اسم التطبيق لاستخدامه كاسم للفولدر المضغوط
+        currentAppName = appName.trim() ? appName.replace(/\s+/g, '_') : 'PWA_App';
+        
         const initialLetter = shortName.trim() ? shortName.trim().charAt(0).toUpperCase() : 'A';
 
         const icon192 = await createIcon(192, themeColor, initialLetter);
@@ -240,7 +315,7 @@
         };
         textFiles['manifest.json'] = JSON.stringify(manifestObj, null, 2);
 
-        textFiles['sw.js'] = "const CACHE_NAME = '" + appName.replace(/\\s+/g, '-').toLowerCase() + "-v2';\n" +
+        textFiles['sw.js'] = "const CACHE_NAME = '" + currentAppName.toLowerCase() + "-v2';\n" +
             "const urlsToCache = [ './', './index.html', './icon-192.png', './icon-512.png', './manifest.json' ];\n\n" +
             "self.addEventListener('install', event => {\n" +
             "  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache)));\n" +
@@ -274,6 +349,33 @@
         textFiles['index.html'] = finalHtml;
 
         document.getElementById('resultsCard').style.display = 'block';
+    }
+
+    // دالة جديدة لإنشاء وتحميل ملف ZIP يحتوي على الـ 5 ملفات في فولدر
+    function downloadAsZip() {
+        if (!window.JSZip) {
+            alert('جاري تحميل مكتبة الضغط، يرجى الانتظار ثانية والمحاولة مرة أخرى.');
+            return;
+        }
+        
+        const zip = new JSZip();
+        
+        // إنشاء فولدر باسم التطبيق داخل الملف المضغوط
+        const folder = zip.folder(currentAppName);
+        
+        // إضافة الملفات النصية
+        folder.file("index.html", textFiles['index.html']);
+        folder.file("manifest.json", textFiles['manifest.json']);
+        folder.file("sw.js", textFiles['sw.js']);
+        
+        // إضافة الصور
+        folder.file("icon-192.png", icon192Blob);
+        folder.file("icon-512.png", icon512Blob);
+        
+        // توليد الملف المضغوط وتحميله
+        zip.generateAsync({type:"blob"}).then(function(content) {
+            downloadBlob(currentAppName + ".zip", content);
+        });
     }
 
     function downloadText(filename) {
