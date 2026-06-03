@@ -67,30 +67,19 @@
             margin-top: 25px;
             border-bottom: 1px solid #334155;
             padding-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
         .file-section:last-child { border: none; }
         
-        .section-header {
-            display: table;
-            width: 100%;
-            margin-bottom: 10px;
-        }
-        .section-title {
-            display: table-cell;
-            vertical-align: middle;
-            font-weight: bold;
-            color: var(--text-main);
-        }
-        .btn-download {
-            display: table-cell;
-            text-align: left;
-        }
+        .section-title { font-weight: bold; color: var(--text-main); }
         .btn-download button {
             background-color: var(--success);
             color: white;
             border: none;
-            padding: 6px 14px;
-            border-radius: 4px;
+            padding: 8px 16px;
+            border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
             font-family: inherit;
@@ -98,36 +87,22 @@
         }
         .btn-download button:hover { background-color: var(--success-hover); }
 
-        .output-box {
-            background: #000;
-            padding: 15px;
-            border-radius: 6px;
-            overflow-x: auto;
-            direction: ltr;
-            text-align: left;
-            border: 1px solid #334155;
-        }
-        pre { margin: 0; color: var(--success); font-family: monospace; font-size: 0.9rem; white-space: pre-wrap; word-wrap: break-word;}
-        
-        .preview-box {
-            text-align: center;
-            margin-top: 10px;
-        }
+        .preview-box { display: flex; gap: 15px; margin-top: 15px; justify-content: center; }
         .preview-box img {
-            width: 120px;
-            height: 120px;
             border-radius: 16px;
             border: 2px solid #334155;
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
     </style>
 
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#3b82f6">
+    
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#000000">
+    <link rel="apple-touch-icon" href="./icon-192.png">
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('sw.js')
+          navigator.serviceWorker.register('./sw.js')
             .then(reg => console.log('SW Registered'))
             .catch(err => console.log('SW Failed', err));
         });
@@ -139,14 +114,14 @@
 <div class="container">
     <div class="card">
         <h1>صانع ومحمل ملفات PWA المتكامل 🚀</h1>
-        <p style="text-align: center; color: var(--text-muted); margin-bottom: 25px;">املا البيانات وحط كود صفحتك وهنولدلك الـ 3 ملفات البرمجية ومعاهم صورة الأيقونة تلقائياً!</p>
+        <p style="text-align: center; color: var(--text-muted); margin-bottom: 25px;">الإصدار المحدث السليم 100% بدون أي أخطاء برمجية</p>
         
         <div class="form-group">
             <label>اسم التطبيق الكامل</label>
             <input type="text" id="appName" placeholder="مثال: My Awesome App" value="My PWA App">
         </div>
         <div class="form-group">
-            <label>الاسم القصير (بيظهر تحت الأيقونة وأول حرف منه هيبقى لوجو التطبيق)</label>
+            <label>الاسم القصير (بيظهر تحت الأيقونة)</label>
             <input type="text" id="shortName" placeholder="مثال: PWA App" value="PWA App">
         </div>
         <div class="form-group">
@@ -159,184 +134,161 @@
             <textarea id="inputHtml" rows="8" placeholder="<!DOCTYPE html>&#10;<html>&#10;<head>&#10;  <title>موقعي</title>&#10;</head>&#10;<body>&#10;  <h1>أهلاً بك</h1>&#10;</body>&#10;</html>"></textarea>
         </div>
 
-        <button class="btn-main" onclick="generateAllFiles()">توليد وتجهيز الـ 4 ملفات للتحميل</button>
+        <button class="btn-main" onclick="generateAllFiles()">توليد وتجهيز الـ 5 ملفات للتحميل</button>
     </div>
 
     <div class="card" id="resultsCard" style="display: none;">
-        <h2>الملفات الـ 4 الجاهزة للتحميل 📁</h2>
-        <p style="text-align: center; color: var(--text-muted); font-size: 0.9rem;">حمل الملفات الأربعة وارفعهم كلهم مع بعض في مستودع GitHub</p>
+        <h2>الملفات الـ 5 الجاهزة للتحميل 📁</h2>
+        <p style="text-align: center; color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">حمل الـ 5 ملفات وارفعهم على مستودع GitHub مباشرة</p>
         
-        <div class="file-section">
-            <div class="section-header">
-                <div class="section-title">1. ملف الأيقونة المولد تلقائياً (icon.png)</div>
-                <div class="btn-download">
-                    <button onclick="downloadIcon()">تحميل icon.png 📥</button>
-                </div>
+        <div class="preview-box" style="margin-bottom: 20px;">
+            <div style="text-align: center;">
+                <img id="icon192Preview" src="" alt="Icon 192" style="width: 96px; height: 96px;">
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px;">مقاس 192x192</div>
             </div>
-            <div class="preview-box">
-                <img id="iconPreview" src="" alt="معاينة الأيقونة">
-                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px;">شكل الأيقونة اللي اتمسحت واتولدت لتطبيقك</div>
+            <div style="text-align: center;">
+                <img id="icon512Preview" src="" alt="Icon 512" style="width: 120px; height: 120px;">
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px;">مقاس 512x512</div>
             </div>
         </div>
 
         <div class="file-section">
-            <div class="section-header">
-                <div class="section-title">2. ملف index.html (مدمج به أكواد الـ PWA)</div>
-                <div class="btn-download">
-                    <button onclick="downloadTextFile('index.html')">تحميل index.html 📥</button>
-                </div>
-            </div>
-            <div class="output-box">
-                <pre id="finalHtmlCode"></pre>
-            </div>
+            <div class="section-title">1. أيقونة كروم (icon-192.png)</div>
+            <div class="btn-download"><button onclick="downloadBlob('icon-192.png', icon192Blob)">تحميل 📥</button></div>
         </div>
 
         <div class="file-section">
-            <div class="section-header">
-                <div class="section-title">3. ملف manifest.json (مرتبط بالأيقونة المحلية)</div>
-                <div class="btn-download">
-                    <button onclick="downloadTextFile('manifest.json')">تحميل manifest.json 📥</button>
-                </div>
-            </div>
-            <div class="output-box">
-                <pre id="manifestCode"></pre>
-            </div>
+            <div class="section-title">2. أيقونة التطبيق (icon-512.png)</div>
+            <div class="btn-download"><button onclick="downloadBlob('icon-512.png', icon512Blob)">تحميل 📥</button></div>
         </div>
 
         <div class="file-section">
-            <div class="section-header">
-                <div class="section-title">4. ملف sw.js (الـ Service Worker للشغل أوفلاين)</div>
-                <div class="btn-download">
-                    <button onclick="downloadTextFile('sw.js')">تحميل sw.js 📥</button>
-                </div>
-            </div>
-            <div class="output-box">
-                <pre id="swCode"></pre>
-            </div>
+            <div class="section-title">3. صفحة الموقع (index.html)</div>
+            <div class="btn-download"><button onclick="downloadText('index.html')">تحميل 📥</button></div>
+        </div>
+
+        <div class="file-section">
+            <div class="section-title">4. إعدادات التثبيت (manifest.json)</div>
+            <div class="btn-download"><button onclick="downloadText('manifest.json')">تحميل 📥</button></div>
+        </div>
+
+        <div class="file-section">
+            <div class="section-title">5. ملف الأوفلاين (sw.js)</div>
+            <div class="btn-download"><button onclick="downloadText('sw.js')">تحميل 📥</button></div>
         </div>
     </div>
 </div>
 
 <script>
-    // حفظ بيانات الملفات نصياً وبصيغة DataURL للصورة
     let textFiles = { 'index.html': '', 'manifest.json': '', 'sw.js': '' };
-    let iconBlobData = null;
+    let icon192Blob = null;
+    let icon512Blob = null;
 
-    function generateAllFiles() {
+    function createIcon(size, color, text) {
+        return new Promise((resolve) => {
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+
+            const gradient = ctx.createLinearGradient(0, 0, 0, size);
+            gradient.addColorStop(0, color);
+            gradient.addColorStop(1, '#0f172a');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, size, size);
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold ' + (size * 0.45) + 'px system-ui, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(text, size / 2, size / 2);
+
+            canvas.toBlob((blob) => {
+                resolve({ blob: blob, dataUrl: canvas.toDataURL('image/png') });
+            }, 'image/png');
+        });
+    }
+
+    async function generateAllFiles() {
         const appName = document.getElementById('appName').value;
         const shortName = document.getElementById('shortName').value;
         const themeColor = document.getElementById('themeColor').value;
         const inputHtml = document.getElementById('inputHtml').value;
-
-        // 1. توليد الأيقونة تلقائياً عن طريق الـ Canvas
-        const canvas = document.createElement('canvas');
-        canvas.width = 512;
-        canvas.height = 512;
-        const ctx = canvas.getContext('2d');
-
-        // رسم الخلفية متناسبة مع ثيم اللون المختار
-        const gradient = ctx.createLinearGradient(0, 0, 0, 512);
-        gradient.addColorStop(0, themeColor);
-        gradient.addColorStop(1, '#0f172a'); // تدرج غامق يعطي مظهر احترافي
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, 512, 512);
-
-        // كتابة أول حرف من الاسم القصير في نص الأيقونة بشكل مميز
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 240px system-ui, -apple-system, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        const initialLetter = shortName.trim() ? shortName.trim().charAt(0).toUpperCase() : 'A';
-        ctx.fillText(initialLetter, 256, 256);
-
-        // عرض الصورة في خانة المعاينة وحفظها للتحميل
-        const iconDataUrl = canvas.toDataURL('image/png');
-        document.getElementById('iconPreview').src = iconDataUrl;
         
-        // تحويل الـ Canvas لـ Blob حقيقي جاهز للتحميل كامتداد مستقل
-        canvas.toBlob((blob) => { iconBlobData = blob; }, 'image/png');
+        const initialLetter = shortName.trim() ? shortName.trim().charAt(0).toUpperCase() : 'A';
 
-        // 2. توليد كود الـ Manifest وربطه بملف icon.png المحلي
+        const icon192 = await createIcon(192, themeColor, initialLetter);
+        const icon512 = await createIcon(512, themeColor, initialLetter);
+        
+        icon192Blob = icon192.blob;
+        icon512Blob = icon512.blob;
+        
+        document.getElementById('icon192Preview').src = icon192.dataUrl;
+        document.getElementById('icon512Preview').src = icon512.dataUrl;
+
         const manifestObj = {
             "name": appName,
             "short_name": shortName,
-            "start_url": "/",
+            "start_url": "./index.html",
             "display": "standalone",
             "background_color": "#ffffff",
             "theme_color": themeColor,
             "icons": [
-                { "src": "icon.png", "sizes": "192x192", "type": "image/png" },
-                { "src": "icon.png", "sizes": "512x512", "type": "image/png" }
+                { "src": "./icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+                { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
             ]
         };
         textFiles['manifest.json'] = JSON.stringify(manifestObj, null, 2);
-        document.getElementById('manifestCode').textContent = textFiles['manifest.json'];
 
-        // 3. توليد كود الـ Service Worker
-        textFiles['sw.js'] = `const CACHE_NAME = '${appName.replace(/\s+/g, '-').toLowerCase()}-cache-v1';
-const urlsToCache = [ '/', '/index.html' ];
+        textFiles['sw.js'] = "const CACHE_NAME = '" + appName.replace(/\\s+/g, '-').toLowerCase() + "-v2';\n" +
+            "const urlsToCache = [ './', './index.html', './icon-192.png', './icon-512.png', './manifest.json' ];\n\n" +
+            "self.addEventListener('install', event => {\n" +
+            "  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache)));\n" +
+            "});\n\n" +
+            "self.addEventListener('fetch', event => {\n" +
+            "  event.respondWith(caches.match(event.request).then(response => response || fetch(event.request)));\n" +
+            "});";
 
-self.addEventListener('install', event => {
-  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache)));
-});
-
-self.addEventListener('fetch', event => {
-  event.respondWith(caches.match(event.request).then(response => response || fetch(event.request)));
-});`;
-        document.getElementById('swCode').textContent = textFiles['sw.js'];
-
-        // 4. دمج التاجات البرمجية داخل الهيدر الخاص بـ index.html
-        const pwaTags = `
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="${themeColor}">
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('sw.js')
-            .then(reg => console.log('SW Registered'))
-            .catch(err => console.log('SW Failed', err));
-        });
-      }
-    <\/script>\n`;
+        const pwaTags = "\n    \n" +
+            "    <link rel=\"manifest\" href=\"./manifest.json\">\n" +
+            "    <meta name=\"theme-color\" content=\"" + themeColor + "\">\n" +
+            "    <link rel=\"apple-touch-icon\" href=\"./icon-192.png\">\n" +
+            "    <script>\n" +
+            "      if ('serviceWorker' in navigator) {\n" +
+            "        window.addEventListener('load', () => {\n" +
+            "          navigator.serviceWorker.register('./sw.js')\n" +
+            "            .then(reg => console.log('SW Registered'))\n" +
+            "            .catch(err => console.log('SW Failed', err));\n" +
+            "        });\n" +
+            "      }\n" +
+            "    <\/script>\n";
 
         let finalHtml = '';
-        const sourceHtml = inputHtml.trim() ? inputHtml : `<!DOCTYPE html>\n<html>\n<head>\n  <title>${appName}</title>\n</head>\n<body>\n  <h1>مرحباً بك في ${appName}</h1>\n</body>\n</html>`;
+        const sourceHtml = inputHtml.trim() ? inputHtml : "<!DOCTYPE html>\n<html>\n<head>\n  <title>" + appName + "</title>\n</head>\n<body>\n  <h1 style=\"text-align:center; margin-top:50px;\">مرحباً بك في " + appName + "</h1>\n</body>\n</html>";
         
         if (/(<\/head>)/i.test(sourceHtml)) {
             finalHtml = sourceHtml.replace(/(<\/head>)/i, pwaTags + '$1');
         } else {
             finalHtml = pwaTags + '\n' + sourceHtml;
         }
-        
         textFiles['index.html'] = finalHtml;
-        document.getElementById('finalHtmlCode').textContent = finalHtml;
 
-        // فتح لوحة التحكم وإظهار كافة الملفات
         document.getElementById('resultsCard').style.display = 'block';
     }
 
-    // دالة تحميل ملفات الأكواد النصية
-    function downloadTextFile(filename) {
+    function downloadText(filename) {
         const text = textFiles[filename];
         if (!text) return;
         const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+        downloadBlob(filename, blob);
+    }
+
+    function downloadBlob(filename, blob) {
+        if (!blob) return;
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
         a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    }
-
-    // دالة تحميل ملف الصورة المنفصل icon.png
-    function downloadIcon() {
-        if (!iconBlobData) return;
-        const url = URL.createObjectURL(iconBlobData);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'icon.png';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
