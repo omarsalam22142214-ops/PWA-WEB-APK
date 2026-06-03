@@ -112,7 +112,7 @@
     </style>
 
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#000000">
+    <meta name="theme-color" content="#3b82f6">
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
@@ -128,7 +128,7 @@
 <div class="container">
     <div class="card">
         <h1>صانع ومحمل ملفات PWA تلقائياً 🚀</h1>
-        <p style="text-align: center; color: var(--text-muted); margin-bottom: 25px;">املا البيانات وحط كود صفحتك وهنطلعلك الملفات جاهزة للتحميل فوراً</p>
+        <p style="text-align: center; color: var(--text-muted); margin-bottom: 25px;">املا البيانات وحط كود صفحتك وهنطلعلك الملفات جاهزة بالصور الافتراضية</p>
         
         <div class="form-group">
             <label>اسم التطبيق الكامل</label>
@@ -143,8 +143,8 @@
             <input type="color" id="themeColor" value="#3b82f6" style="height: 40px; padding: 2px;">
         </div>
         <div class="form-group">
-            <label>رابط أو اسم الأيقونة</label>
-            <input type="text" id="iconUrl" placeholder="مثال: icon.png" value="icon.png">
+            <label>رابط أو اسم الأيقونة (لو سبتها زي ما هي هيستخدم صور افتراضية جاهزة على النت)</label>
+            <input type="text" id="iconUrl" placeholder="مثال: icon.png" value="default">
         </div>
         
         <div class="form-group">
@@ -157,7 +157,7 @@
 
     <div class="card" id="resultsCard" style="display: none;">
         <h2>الملفات الجاهزة للتحميل 📁</h2>
-        <p style="text-align: center; color: var(--text-muted); font-size: 0.9rem;">اضغط على زرار التحميل الأخضر لكل ملف عشان ينزل عندك مباشرة</p>
+        <p style="text-align: center; color: var(--text-muted); font-size: 0.9rem;">الملفات مجهزة الآن بصور روابط مباشرة، حملها وارفعها على GitHub فوراً!</p>
         
         <div class="file-section">
             <div class="section-header">
@@ -173,7 +173,7 @@
 
         <div class="file-section">
             <div class="section-header">
-                <div class="section-title">2. ملف manifest.json (إعدادات التثبيت والأيقونة)</div>
+                <div class="section-title">2. ملف manifest.json (إعدادات التثبيت والأيقونة الافتراضية)</div>
                 <div class="btn-download">
                     <button onclick="downloadFile('manifest.json', 'manifestCode')">تحميل manifest.json 📥</button>
                 </div>
@@ -198,7 +198,6 @@
 </div>
 
 <script>
-    // متغيرات عالمية لحفظ النصوص الجاهزة للتحميل
     let filesData = {
         'index.html': '',
         'manifest.json': '',
@@ -209,10 +208,20 @@
         const appName = document.getElementById('appName').value;
         const shortName = document.getElementById('shortName').value;
         const themeColor = document.getElementById('themeColor').value;
-        const iconUrl = document.getElementById('iconUrl').value;
+        let iconUrl = document.getElementById('iconUrl').value;
         const inputHtml = document.getElementById('inputHtml').value;
 
-        // 1. توليد كود الـ Manifest
+        // تحديد الأيقونات الافتراضية الجاهزة لو القيمة "default" أو فاضية
+        let icon192 = iconUrl;
+        let icon512 = iconUrl;
+        
+        if (iconUrl.trim() === '' || iconUrl.toLowerCase() === 'default' || iconUrl === 'icon.png') {
+            // لينكات صور سيرفرات مفتوحة المصدر ومضمونة لشعار PWA القياسي بمقاسات دقيقة
+            icon192 = "https://cdn.jsdelivr.net/gh/web-push-libs/web-push-php@master/tests/Resources/logo.png";
+            icon512 = "https://cdn.jsdelivr.net/gh/web-push-libs/web-push-php@master/tests/Resources/logo.png";
+        }
+
+        // 1. توليد كود الـ Manifest بالروابط الافتراضية للصور
         const manifestObj = {
             "name": appName,
             "short_name": shortName,
@@ -221,8 +230,8 @@
             "background_color": "#ffffff",
             "theme_color": themeColor,
             "icons": [
-                { "src": iconUrl, "sizes": "192x192", "type": "image/png" },
-                { "src": iconUrl, "sizes": "512x512", "type": "image/png" }
+                { "src": icon192, "sizes": "192x192", "type": "image/png" },
+                { "src": icon512, "sizes": "512x512", "type": "image/png" }
             ]
         };
         filesData['manifest.json'] = JSON.stringify(manifestObj, null, 2);
@@ -276,7 +285,6 @@ self.addEventListener('fetch', event => {
         document.getElementById('resultsCard').style.display = 'block';
     }
 
-    // دالة التحميل المباشر للملفات
     function downloadFile(filename, elementId) {
         const text = filesData[filename];
         if (!text) return;
@@ -290,7 +298,301 @@ self.addEventListener('fetch', event => {
         document.body.appendChild(a);
         a.click();
         
-        // تنظيف الذاكرة بعد التحميل
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+</script>
+
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PWA Generator & Downloader</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --success: #10b981;
+            --success-hover: #059669;
+        }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        h1, h2 { text-align: center; color: var(--text-main); margin-top: 0; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; color: var(--text-muted); font-size: 0.9rem; }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #334155;
+            border-radius: 6px;
+            background: #0f172a;
+            color: white;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+        textarea { resize: vertical; font-family: monospace; direction: ltr; }
+        
+        /* الأزرار */
+        .btn-main {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .btn-main:hover { background-color: var(--primary-hover); }
+        
+        .file-section {
+            margin-top: 25px;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 20px;
+        }
+        .file-section:last-child { border: none; }
+        
+        .section-header {
+            display: table;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        .section-title {
+            display: table-cell;
+            vertical-align: middle;
+            font-weight: bold;
+            color: var(--text-main);
+        }
+        .btn-download {
+            display: table-cell;
+            text-align: left;
+        }
+        .btn-download button {
+            background-color: var(--success);
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: inherit;
+            transition: background 0.3s;
+        }
+        .btn-download button:hover { background-color: var(--success-hover); }
+
+        .output-box {
+            background: #000;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            direction: ltr;
+            text-align: left;
+            border: 1px solid #334155;
+        }
+        pre { margin: 0; color: var(--success); font-family: monospace; font-size: 0.9rem; white-space: pre-wrap; word-wrap: break-word;}
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="card">
+        <h1>صانع ومحمل ملفات PWA تلقائياً 🚀</h1>
+        <p style="text-align: center; color: var(--text-muted); margin-bottom: 25px;">املا البيانات وحط كود صفحتك وهنطلعلك الملفات جاهزة بالصور الافتراضية</p>
+        
+        <div class="form-group">
+            <label>اسم التطبيق الكامل</label>
+            <input type="text" id="appName" placeholder="مثال: My Awesome App" value="My PWA App">
+        </div>
+        <div class="form-group">
+            <label>الاسم القصير (تحت الأيقونة)</label>
+            <input type="text" id="shortName" placeholder="مثال: PWA App" value="PWA App">
+        </div>
+        <div class="form-group">
+            <label>لون الواجهة (Theme Color)</label>
+            <input type="color" id="themeColor" value="#3b82f6" style="height: 40px; padding: 2px;">
+        </div>
+        <div class="form-group">
+            <label>رابط أو اسم الأيقونة (لو سبتها زي ما هي هيستخدم صور افتراضية جاهزة على النت)</label>
+            <input type="text" id="iconUrl" placeholder="مثال: icon.png" value="default">
+        </div>
+        
+        <div class="form-group">
+            <label>كود صفحتك الأصلية (index.html)</label>
+            <textarea id="inputHtml" rows="8" placeholder="<!DOCTYPE html>&#10;<html>&#10;<head>&#10;  <title>موقعي</title>&#10;</head>&#10;<body>&#10;  <h1>أهلاً بك</h1>&#10;</body>&#10;</html>"></textarea>
+        </div>
+
+        <button class="btn-main" onclick="generateAndPrepare()">توليد وتجهيز الملفات للتحميل</button>
+    </div>
+
+    <div class="card" id="resultsCard" style="display: none;">
+        <h2>الملفات الجاهزة للتحميل 📁</h2>
+        <p style="text-align: center; color: var(--text-muted); font-size: 0.9rem;">الملفات مجهزة الآن بصور روابط مباشرة، حملها وارفعها على GitHub فوراً!</p>
+        
+        <div class="file-section">
+            <div class="section-header">
+                <div class="section-title">1. ملف index.html (مدمج به أكواد الـ PWA)</div>
+                <div class="btn-download">
+                    <button onclick="downloadFile('index.html', 'finalHtmlCode')">تحميل index.html 📥</button>
+                </div>
+            </div>
+            <div class="output-box">
+                <pre id="finalHtmlCode"></pre>
+            </div>
+        </div>
+
+        <div class="file-section">
+            <div class="section-header">
+                <div class="section-title">2. ملف manifest.json (إعدادات التثبيت والأيقونة الافتراضية)</div>
+                <div class="btn-download">
+                    <button onclick="downloadFile('manifest.json', 'manifestCode')">تحميل manifest.json 📥</button>
+                </div>
+            </div>
+            <div class="output-box">
+                <pre id="manifestCode"></pre>
+            </div>
+        </div>
+
+        <div class="file-section">
+            <div class="section-header">
+                <div class="section-title">3. ملف sw.js (الـ Service Worker للشغل أوفلاين)</div>
+                <div class="btn-download">
+                    <button onclick="downloadFile('sw.js', 'swCode')">تحميل sw.js 📥</button>
+                </div>
+            </div>
+            <div class="output-box">
+                <pre id="swCode"></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let filesData = {
+        'index.html': '',
+        'manifest.json': '',
+        'sw.js': ''
+    };
+
+    function generateAndPrepare() {
+        const appName = document.getElementById('appName').value;
+        const shortName = document.getElementById('shortName').value;
+        const themeColor = document.getElementById('themeColor').value;
+        let iconUrl = document.getElementById('iconUrl').value;
+        const inputHtml = document.getElementById('inputHtml').value;
+
+        // تحديد الأيقونات الافتراضية الجاهزة لو القيمة "default" أو فاضية
+        let icon192 = iconUrl;
+        let icon512 = iconUrl;
+        
+        if (iconUrl.trim() === '' || iconUrl.toLowerCase() === 'default' || iconUrl === 'icon.png') {
+            // لينكات صور سيرفرات مفتوحة المصدر ومضمونة لشعار PWA القياسي بمقاسات دقيقة
+            icon192 = "https://cdn.jsdelivr.net/gh/web-push-libs/web-push-php@master/tests/Resources/logo.png";
+            icon512 = "https://cdn.jsdelivr.net/gh/web-push-libs/web-push-php@master/tests/Resources/logo.png";
+        }
+
+        // 1. توليد كود الـ Manifest بالروابط الافتراضية للصور
+        const manifestObj = {
+            "name": appName,
+            "short_name": shortName,
+            "start_url": "/",
+            "display": "standalone",
+            "background_color": "#ffffff",
+            "theme_color": themeColor,
+            "icons": [
+                { "src": icon192, "sizes": "192x192", "type": "image/png" },
+                { "src": icon512, "sizes": "512x512", "type": "image/png" }
+            ]
+        };
+        filesData['manifest.json'] = JSON.stringify(manifestObj, null, 2);
+        document.getElementById('manifestCode').textContent = filesData['manifest.json'];
+
+        // 2. توليد كود الـ Service Worker
+        filesData['sw.js'] = `const CACHE_NAME = '${appName.replace(/\s+/g, '-').toLowerCase()}-cache-v1';
+const urlsToCache = [ '/', '/index.html' ];
+
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
+  );
+});
+
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    caches.match(event.request).then(response => response || fetch(event.request))
+  );
+});`;
+        document.getElementById('swCode').textContent = filesData['sw.js'];
+
+        // 3. تجهيز التاجات لحقنها في الـ HTML
+        const pwaTags = `
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="${themeColor}">
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('sw.js')
+            .then(reg => console.log('SW Registered'))
+            .catch(err => console.log('SW Failed', err));
+        });
+      }
+    <\/script>\n`;
+
+        // 4. معالجة وحقن كود الـ HTML
+        let finalHtml = '';
+        const sourceHtml = inputHtml.trim() ? inputHtml : `<!DOCTYPE html>\n<html>\n<head>\n  <title>${appName}</title>\n</head>\n<body>\n  <h1>مرحباً بك في ${appName}</h1>\n</body>\n</html>`;
+        
+        if (/(<\/head>)/i.test(sourceHtml)) {
+            finalHtml = sourceHtml.replace(/(<\/head>)/i, pwaTags + '$1');
+        } else {
+            finalHtml = pwaTags + '\n' + sourceHtml;
+        }
+        
+        filesData['index.html'] = finalHtml;
+        document.getElementById('finalHtmlCode').textContent = finalHtml;
+
+        // إظهار كارت النتائج بالملفات
+        document.getElementById('resultsCard').style.display = 'block';
+    }
+
+    function downloadFile(filename, elementId) {
+        const text = filesData[filename];
+        if (!text) return;
+        
+        const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
     }
